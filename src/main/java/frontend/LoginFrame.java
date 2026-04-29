@@ -13,6 +13,9 @@ import org.json.JSONObject;
 
 public class LoginFrame extends JFrame {
 
+    // URL de Render (backend online)
+    private static final String BASE_URL = "https://inventario-backend-rshu.onrender.com";
+
     private JTextField txtUser;
     private JPasswordField txtPass;
 
@@ -37,7 +40,7 @@ public class LoginFrame extends JFrame {
         JButton btnLogin = new JButton("Ingresar");
         JButton btnSalir = new JButton("Salir");
 
-        panel.add(new JLabel("")); // espacio
+        panel.add(new JLabel(""));
         panel.add(btnLogin);
 
         add(panel);
@@ -56,12 +59,21 @@ public class LoginFrame extends JFrame {
         String password = new String(txtPass.getPassword()).trim();
 
         if (username.isEmpty() || password.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Usuario y contraseña son obligatorios", "Error", JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Usuario y contraseña son obligatorios",
+                    "Error",
+                    JOptionPane.WARNING_MESSAGE
+            );
             return;
         }
 
         try {
-            URL url = new URL("http://localhost:8080/auth/login");
+            // CAMBIO IMPORTANTE:
+            // Antes: http://localhost:8080/auth/login
+            // Ahora: URL pública de Render
+            URL url = new URL(BASE_URL + "/auth/login");
+
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("POST");
             conn.setRequestProperty("Content-Type", "application/json");
@@ -76,10 +88,14 @@ public class LoginFrame extends JFrame {
             int responseCode = conn.getResponseCode();
 
             if (responseCode == 200) {
-                // Leer respuesta
+
                 StringBuilder response = new StringBuilder();
-                try (BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream(), "UTF-8"))) {
+
+                try (BufferedReader reader = new BufferedReader(
+                        new InputStreamReader(conn.getInputStream(), "UTF-8"))) {
+
                     String line;
+
                     while ((line = reader.readLine()) != null) {
                         response.append(line);
                     }
@@ -92,39 +108,64 @@ public class LoginFrame extends JFrame {
                 usuario.setUsername(obj.getString("username"));
                 usuario.setRole(Role.valueOf(obj.getString("role")));
 
-                // Iniciar sesión
+                // Guardar sesión
                 SesionUsuario.iniciarSesion(usuario);
 
-                JOptionPane.showMessageDialog(this,
+                JOptionPane.showMessageDialog(
+                        this,
                         "¡Bienvenido " + usuario.getUsername() + "!\nRol: " + usuario.getRole(),
-                        "Acceso Correcto", JOptionPane.INFORMATION_MESSAGE);
+                        "Acceso Correcto",
+                        JOptionPane.INFORMATION_MESSAGE
+                );
 
-                // Cerrar login y abrir MainApp correctamente
+                // Cerrar login
                 this.dispose();
 
-                // Importante: Ejecutar en el Event Dispatch Thread
+                // Abrir sistema principal
                 SwingUtilities.invokeLater(() -> {
                     new MainApp().setVisible(true);
                 });
 
             } else {
+
                 String errorMsg = "Usuario o contraseña incorrectos";
-                try (BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getErrorStream(), "UTF-8"))) {
+
+                try (BufferedReader reader = new BufferedReader(
+                        new InputStreamReader(conn.getErrorStream(), "UTF-8"))) {
+
                     StringBuilder err = new StringBuilder();
                     String line;
-                    while ((line = reader.readLine()) != null) err.append(line);
-                    if (err.length() > 0) errorMsg = err.toString();
-                } catch (Exception ignored) {}
 
-                JOptionPane.showMessageDialog(this, errorMsg, "Error de Login", JOptionPane.ERROR_MESSAGE);
+                    while ((line = reader.readLine()) != null) {
+                        err.append(line);
+                    }
+
+                    if (err.length() > 0) {
+                        errorMsg = err.toString();
+                    }
+
+                } catch (Exception ignored) {
+                }
+
+                JOptionPane.showMessageDialog(
+                        this,
+                        errorMsg,
+                        "Error de Login",
+                        JOptionPane.ERROR_MESSAGE
+                );
             }
 
         } catch (Exception ex) {
             ex.printStackTrace();
-            JOptionPane.showMessageDialog(this,
-                    "Error de conexión con el servidor.\n\n" + ex.getMessage() +
-                            "\n\nAsegúrate que el backend esté corriendo.",
-                    "Error", JOptionPane.ERROR_MESSAGE);
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Error de conexión con el servidor.\n\n"
+                            + ex.getMessage()
+                            + "\n\nVerifica que Render esté activo.",
+                    "Error",
+                    JOptionPane.ERROR_MESSAGE
+            );
         }
     }
 

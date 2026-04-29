@@ -14,6 +14,8 @@ import org.json.JSONObject;
 
 public class MainApp extends JFrame {
 
+    private static final String BASE_URL = "https://inventario-backend-rshu.onrender.com";
+
     private CardLayout cardLayout;
     private JPanel panelPrincipal;
     private DefaultTableModel modeloProductos;
@@ -65,7 +67,7 @@ public class MainApp extends JFrame {
         JComboBox<ItemProducto> combo = new JComboBox<>();
 
         try {
-            URL url = new URL("http://localhost:8080/productos");
+            URL url = new URL(BASE_URL + "/productos");
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 
             try (BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()))) {
@@ -134,7 +136,7 @@ public class MainApp extends JFrame {
             }
 
             try {
-                URL url = new URL("http://localhost:8080/productos");
+                URL url = new URL(BASE_URL + "/productos");
                 HttpURLConnection conn = (HttpURLConnection) url.openConnection();
                 conn.setRequestMethod("POST");
                 conn.setRequestProperty("Content-Type", "application/json");
@@ -172,7 +174,7 @@ public class MainApp extends JFrame {
 
     private void cargarProductos(DefaultTableModel modelo) {
         try {
-            URL url = new URL("http://localhost:8080/inventario");
+            URL url = new URL(BASE_URL + "/inventario");
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 
             try (BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()))) {
@@ -263,7 +265,7 @@ public class MainApp extends JFrame {
         btnRefresh.addActionListener(e -> {
             combo.removeAllItems();
             try {
-                URL url = new URL("http://localhost:8080/productos");
+                URL url = new URL(BASE_URL + "/productos");
                 HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 
                 BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
@@ -316,7 +318,7 @@ public class MainApp extends JFrame {
                         + "\"producto\": {\"id\": " + item.id + "}"
                         + "}";
 
-                URL url = new URL("http://localhost:8080/movimientos");
+                URL url = new URL(BASE_URL + "/movimientos");
                 HttpURLConnection conn = (HttpURLConnection) url.openConnection();
                 conn.setRequestMethod("POST");
                 conn.setRequestProperty("Content-Type", "application/json");
@@ -417,7 +419,7 @@ public class MainApp extends JFrame {
 
     private void eliminarMovimiento(Long id, DefaultTableModel modelo) {
         try {
-            URL url = new URL("http://localhost:8080/movimientos/" + id);
+            URL url = new URL(BASE_URL + "/movimientos/" + id);
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("DELETE");
 
@@ -438,7 +440,7 @@ public class MainApp extends JFrame {
 
     private void cargarHistorial(DefaultTableModel modelo) {
         try {
-            URL url = new URL("http://localhost:8080/movimientos");
+            URL url = new URL(BASE_URL + "/movimientos");
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 
             try (BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()))) {
@@ -514,7 +516,7 @@ public class MainApp extends JFrame {
 
     private void cargarKardex(Long productoId, DefaultTableModel modelo) {
         try {
-            URL url = new URL("http://localhost:8080/movimientos/kardex/" + productoId);
+            URL url = new URL(BASE_URL + "/movimientos/kardex/" + productoId);
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 
             try (BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()))) {
